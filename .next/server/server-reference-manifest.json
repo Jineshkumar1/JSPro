@@ -1,0 +1,70 @@
+{
+  "node": {
+    "405563dba3228c3995b8263b12ef1b294126182fcf": {
+      "workers": {
+        "app/page": {
+          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
+          "async": false
+        },
+        "app/market/page": {
+          "moduleId": "[project]/.next-internal/server/app/market/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/page": "action-browser",
+        "app/market/page": "action-browser"
+      }
+    },
+    "00298ce04da8a6088f2389792f8cafcd2954e28a0b": {
+      "workers": {
+        "app/page": {
+          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
+          "async": false
+        },
+        "app/market/page": {
+          "moduleId": "[project]/.next-internal/server/app/market/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/page": "action-browser",
+        "app/market/page": "action-browser"
+      }
+    },
+    "600b19a42385ef78981a2bd8a66b15e716df2fe1af": {
+      "workers": {
+        "app/page": {
+          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
+          "async": false
+        },
+        "app/market/page": {
+          "moduleId": "[project]/.next-internal/server/app/market/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/page": "action-browser",
+        "app/market/page": "action-browser"
+      }
+    },
+    "40bd33f79784a5b327dd4f7e9d9d91296f4441366d": {
+      "workers": {
+        "app/page": {
+          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
+          "async": false
+        },
+        "app/market/page": {
+          "moduleId": "[project]/.next-internal/server/app/market/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/page": "action-browser",
+        "app/market/page": "action-browser"
+      }
+    }
+  },
+  "edge": {},
+  "encryptionKey": "zT7v6+iRaVWiEgs55g3IU1m1+vQk5fHIgk5JoIo6TxA="
+}

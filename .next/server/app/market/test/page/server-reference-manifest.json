@@ -1,0 +1,16 @@
+{
+  "node": {
+    "0055ebfe9bd390013597a6c0911385fa4defb8a438": {
+      "workers": {
+        "app/market/test/page": {
+          "moduleId": "[project]/.next-internal/server/app/market/test/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/market/testStock.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/market/test/page": "rsc"
+      }
+    }
+  },
+  "edge": {}
+}
