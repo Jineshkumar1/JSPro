@@ -29,6 +29,15 @@ export interface HistoricalData {
   volume: number;
 }
 
+export interface SearchResult {
+  symbol: string;
+  shortname?: string;
+  longname?: string;
+  exchange: string;
+  typeDisp: string;
+  quoteType: string;
+}
+
 export async function getStockQuote(symbol: string): Promise<StockQuote> {
   try {
     // Using the quote method with specific fields
@@ -44,8 +53,6 @@ export async function getStockQuote(symbol: string): Promise<StockQuote> {
         'marketCap'
       ]
     });
-
-    console.log(`Raw data for ${symbol}:`, JSON.stringify(quote, null, 2));
 
     if (!quote) {
       throw new Error(`No data received for ${symbol}`);
@@ -97,12 +104,24 @@ export async function getHistoricalData(
   }
 }
 
-export async function searchStocks(query: string) {
+export async function searchStocks(query: string): Promise<SearchResult[]> {
   try {
     const results = await yahooFinance.search(query);
-    return results.quotes.filter((quote: any) => 
-      quote.quoteType === 'EQUITY' || quote.quoteType === 'ETF'
-    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return results.quotes
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .filter((quote: any) => 
+        quote.quoteType === 'EQUITY' || quote.quoteType === 'ETF'
+      )
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .map((quote: any) => ({
+        symbol: quote.symbol || '',
+        shortname: quote.shortname,
+        longname: quote.longname,
+        exchange: quote.exchange || '',
+        typeDisp: quote.typeDisp || '',
+        quoteType: quote.quoteType || '',
+      }));
   } catch (error) {
     console.error(`Error searching stocks with query ${query}:`, error);
     throw error;
@@ -110,8 +129,8 @@ export async function searchStocks(query: string) {
 }
 
 export async function getTrendingStocks(): Promise<StockQuote[]> {
-  // Popular tech stocks
-  const trendingSymbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA'];
+  // FAANG + Popular tech stocks
+  const trendingSymbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'NFLX'];
   
   try {
     const quotes = await Promise.all(
@@ -144,6 +163,80 @@ export async function getTrendingStocks(): Promise<StockQuote[]> {
     return validQuotes;
   } catch (error) {
     console.error('Error fetching trending stocks:', error);
+    throw error;
+  }
+}
+
+export async function getDailyGainers(): Promise<StockQuote[]> {
+  // Popular stocks that typically have significant daily movements
+  const gainerSymbols = ['NVDA', 'AMD', 'TSLA', 'META', 'NFLX', 'CRM', 'ADBE', 'PYPL'];
+  
+  try {
+    const quotes = await Promise.all(
+      gainerSymbols.map(async symbol => {
+        try {
+          return await getStockQuote(symbol);
+        } catch (error) {
+          console.error(`Error fetching ${symbol}:`, error);
+          return {
+            symbol,
+            name: symbol,
+            price: 0,
+            change: 0,
+            changePercentage: 0,
+            volume: 0,
+            marketCap: 0
+          };
+        }
+      })
+    );
+    
+    const validQuotes = quotes.filter(quote => quote.price > 0);
+    
+    // Sort by percentage gain (highest first)
+    return validQuotes
+      .filter(quote => quote.changePercentage > 0)
+      .sort((a, b) => b.changePercentage - a.changePercentage)
+      .slice(0, 6); // Return top 6 gainers
+  } catch (error) {
+    console.error('Error fetching daily gainers:', error);
+    throw error;
+  }
+}
+
+export async function getDailyLosers(): Promise<StockQuote[]> {
+  // Popular stocks that typically have significant daily movements
+  const loserSymbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'META', 'TSLA', 'NVDA', 'NFLX'];
+  
+  try {
+    const quotes = await Promise.all(
+      loserSymbols.map(async symbol => {
+        try {
+          return await getStockQuote(symbol);
+        } catch (error) {
+          console.error(`Error fetching ${symbol}:`, error);
+          return {
+            symbol,
+            name: symbol,
+            price: 0,
+            change: 0,
+            changePercentage: 0,
+            volume: 0,
+            marketCap: 0
+          };
+        }
+      })
+    );
+    
+    const validQuotes = quotes.filter(quote => quote.price > 0);
+    
+    // Sort by percentage loss (lowest first)
+    return validQuotes
+      .filter(quote => quote.changePercentage < 0)
+      .sort((a, b) => a.changePercentage - b.changePercentage)
+      .slice(0, 6); // Return top 6 losers
+  } catch (error) {
+    console.error('Error fetching daily losers:', error);
     throw error;
   }
 }

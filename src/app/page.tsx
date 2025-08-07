@@ -1,48 +1,12 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Dashboard } from "@/components/layout/Dashboard";
 import { StockCard } from "@/components/features/StockCard";
 import { TransactionList } from "@/components/features/TransactionList";
 import { PortfolioSummary } from "@/components/features/PortfolioSummary";
-
-const trendingStocks = [
-  {
-    symbol: "TSLA",
-    name: "Tesla Inc",
-    price: 462.25,
-    change: 31.65,
-    changePercentage: 7.35,
-  },
-  {
-    symbol: "AMZN",
-    name: "Amazon",
-    price: 144.85,
-    change: -15.27,
-    changePercentage: -4.67,
-  },
-];
-
-const mostProfitableStocks = [
-  {
-    symbol: "FB",
-    name: "Meta",
-    price: 607.75,
-    change: -7.90,
-    changePercentage: -1.52,
-  },
-  {
-    symbol: "NVDA",
-    name: "NVIDIA",
-    price: 256.27,
-    change: 11.15,
-    changePercentage: 3.98,
-  },
-  {
-    symbol: "ADBE",
-    name: "Adobe",
-    price: 458.59,
-    change: 15.18,
-    changePercentage: 2.65,
-  },
-];
+import { StockDetailModal } from "@/components/features/StockDetailModal";
+import { getTrendingStocks, getDailyGainers, getDailyLosers, StockQuote } from "@/app/actions/stockActions";
 
 const recentTransactions = [
   {
@@ -80,6 +44,43 @@ const portfolioMetrics = {
 };
 
 export default function Home() {
+  const [trendingStocks, setTrendingStocks] = useState<StockQuote[]>([]);
+  const [dailyGainers, setDailyGainers] = useState<StockQuote[]>([]);
+  const [dailyLosers, setDailyLosers] = useState<StockQuote[]>([]);
+  const [selectedStock, setSelectedStock] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Fetch stock data on component mount
+  useEffect(() => {
+    const fetchStockData = async () => {
+      try {
+        const [trending, gainers, losers] = await Promise.all([
+          getTrendingStocks(),
+          getDailyGainers(),
+          getDailyLosers(),
+        ]);
+
+        setTrendingStocks(trending);
+        setDailyGainers(gainers);
+        setDailyLosers(losers);
+      } catch (error) {
+        console.error('Error fetching stock data:', error);
+      }
+    };
+
+    fetchStockData();
+  }, []);
+
+  const handleStockClick = (symbol: string) => {
+    setSelectedStock(symbol);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedStock(null);
+  };
+
   return (
     <Dashboard>
       <div className="space-y-8">
@@ -91,24 +92,51 @@ export default function Home() {
               View all
             </button>
           </div>
-          <div className="grid grid-cols-1 gap-4 tablet:grid-cols-2">
-            {trendingStocks.map((stock) => (
-              <StockCard key={stock.symbol} {...stock} />
+          <div className="grid grid-cols-1 gap-4 tablet:grid-cols-2 desktop:grid-cols-4">
+            {trendingStocks.slice(0, 4).map((stock) => (
+              <StockCard 
+                key={stock.symbol} 
+                {...stock} 
+                onClick={handleStockClick}
+              />
             ))}
           </div>
         </div>
 
-        {/* Most Profitable Section */}
+        {/* Most Up (Daily Gainers) Section */}
         <div>
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Most profitable</h2>
+            <h2 className="text-lg font-semibold">Most Up</h2>
             <button className="text-sm text-text-secondary hover:text-text-primary">
               View all
             </button>
           </div>
-          <div className="grid grid-cols-1 gap-4 tablet:grid-cols-3">
-            {mostProfitableStocks.map((stock) => (
-              <StockCard key={stock.symbol} {...stock} />
+          <div className="grid grid-cols-1 gap-4 tablet:grid-cols-2 desktop:grid-cols-3">
+            {dailyGainers.slice(0, 6).map((stock) => (
+              <StockCard 
+                key={stock.symbol} 
+                {...stock} 
+                onClick={handleStockClick}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Most Down (Daily Losers) Section */}
+        <div>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Most Down</h2>
+            <button className="text-sm text-text-secondary hover:text-text-primary">
+              View all
+            </button>
+          </div>
+          <div className="grid grid-cols-1 gap-4 tablet:grid-cols-2 desktop:grid-cols-3">
+            {dailyLosers.slice(0, 6).map((stock) => (
+              <StockCard 
+                key={stock.symbol} 
+                {...stock} 
+                onClick={handleStockClick}
+              />
             ))}
           </div>
         </div>
@@ -131,13 +159,22 @@ export default function Home() {
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-semibold">My portfolio</h2>
               <button className="text-sm text-text-secondary hover:text-text-primary">
-                View all
+                View details
               </button>
             </div>
             <PortfolioSummary metrics={portfolioMetrics} />
           </div>
         </div>
       </div>
+
+      {/* Stock Detail Modal */}
+      {selectedStock && (
+        <StockDetailModal
+          symbol={selectedStock}
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+        />
+      )}
     </Dashboard>
   );
 }
