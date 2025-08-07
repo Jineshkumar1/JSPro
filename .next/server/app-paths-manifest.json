@@ -1,7 +1,7 @@
 {
   "/page": "app/page.js",
   "/favicon.ico/route": "app/favicon.ico/route.js",
-  "/api/finnhub/route": "app/api/finnhub/route.js",
-  "/market/page": "app/market/page.js",
-  "/portfolio/page": "app/portfolio/page.js"
+  "/portfolio/page": "app/portfolio/page.js",
+  "/history/page": "app/history/page.js",
+  "/market/page": "app/market/page.js"
 }

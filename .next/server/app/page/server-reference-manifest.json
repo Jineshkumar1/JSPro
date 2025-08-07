@@ -11,6 +11,17 @@
         "app/page": "action-browser"
       }
     },
+    "405563dba3228c3995b8263b12ef1b294126182fcf": {
+      "workers": {
+        "app/page": {
+          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/page": "action-browser"
+      }
+    },
     "600b19a42385ef78981a2bd8a66b15e716df2fe1af": {
       "workers": {
         "app/page": {
@@ -23,17 +34,6 @@
       }
     },
     "00d1f55e9f0af3e21162ede395bfd2a57b78fd825e": {
-      "workers": {
-        "app/page": {
-          "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/page": "action-browser"
-      }
-    },
-    "405563dba3228c3995b8263b12ef1b294126182fcf": {
       "workers": {
         "app/page": {
           "moduleId": "[project]/.next-internal/server/app/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",

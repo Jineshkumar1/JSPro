@@ -82,34 +82,67 @@ __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$yahoo$2d$finance
 });
 async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ getStockQuote(symbol) {
     try {
-        // Using the quote method with specific fields
-        const quote = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$yahoo$2d$finance2$2f$dist$2f$esm$2f$src$2f$index$2d$node$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$locals$3e$__["default"].quote(symbol, {
-            fields: [
-                'symbol',
-                'longName',
-                'shortName',
-                'regularMarketPrice',
-                'regularMarketChange',
-                'regularMarketChangePercent',
-                'regularMarketVolume',
-                'marketCap'
-            ]
-        });
-        if (!quote) {
-            throw new Error(`No data received for ${symbol}`);
+        // Add retry logic and better error handling
+        let retries = 3;
+        let lastError = null;
+        while(retries > 0){
+            try {
+                const quote = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$yahoo$2d$finance2$2f$dist$2f$esm$2f$src$2f$index$2d$node$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$locals$3e$__["default"].quote(symbol, {
+                    fields: [
+                        'symbol',
+                        'longName',
+                        'shortName',
+                        'regularMarketPrice',
+                        'regularMarketChange',
+                        'regularMarketChangePercent',
+                        'regularMarketVolume',
+                        'marketCap'
+                    ]
+                });
+                if (!quote) {
+                    throw new Error(`No data received for ${symbol}`);
+                }
+                return {
+                    symbol: quote.symbol || symbol,
+                    name: quote.longName || quote.shortName || symbol,
+                    price: Number(quote.regularMarketPrice) || 0,
+                    change: Number(quote.regularMarketChange) || 0,
+                    changePercentage: Number(quote.regularMarketChangePercent) || 0,
+                    volume: Number(quote.regularMarketVolume) || 0,
+                    marketCap: Number(quote.marketCap) || 0
+                };
+            } catch (error) {
+                lastError = error;
+                retries--;
+                if (retries > 0) {
+                    // Wait before retrying
+                    await new Promise((resolve)=>setTimeout(resolve, 1000));
+                }
+            }
         }
+        // If all retries failed, return a fallback quote
+        console.warn(`Failed to fetch quote for ${symbol} after retries, using fallback data`);
         return {
-            symbol: quote.symbol || symbol,
-            name: quote.longName || quote.shortName || symbol,
-            price: Number(quote.regularMarketPrice) || 0,
-            change: Number(quote.regularMarketChange) || 0,
-            changePercentage: Number(quote.regularMarketChangePercent) || 0,
-            volume: Number(quote.regularMarketVolume) || 0,
-            marketCap: Number(quote.marketCap) || 0
+            symbol: symbol,
+            name: symbol,
+            price: 0,
+            change: 0,
+            changePercentage: 0,
+            volume: 0,
+            marketCap: 0
         };
     } catch (error) {
         console.error(`Error fetching quote for ${symbol}:`, error);
-        throw error;
+        // Return fallback data instead of throwing
+        return {
+            symbol: symbol,
+            name: symbol,
+            price: 0,
+            change: 0,
+            changePercentage: 0,
+            volume: 0,
+            marketCap: 0
+        };
     }
 }
 async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ getHistoricalData(symbol, period = '1mo') {

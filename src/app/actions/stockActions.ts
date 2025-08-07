@@ -40,36 +40,72 @@ export interface SearchResult {
 
 export async function getStockQuote(symbol: string): Promise<StockQuote> {
   try {
-    // Using the quote method with specific fields
-    const quote = await yahooFinance.quote(symbol, {
-      fields: [
-        'symbol',
-        'longName',
-        'shortName',
-        'regularMarketPrice',
-        'regularMarketChange',
-        'regularMarketChangePercent',
-        'regularMarketVolume',
-        'marketCap'
-      ]
-    });
+    // Add retry logic and better error handling
+    let retries = 3;
+    let lastError: Error | null = null;
 
-    if (!quote) {
-      throw new Error(`No data received for ${symbol}`);
+    while (retries > 0) {
+      try {
+        const quote = await yahooFinance.quote(symbol, {
+          fields: [
+            'symbol',
+            'longName',
+            'shortName',
+            'regularMarketPrice',
+            'regularMarketChange',
+            'regularMarketChangePercent',
+            'regularMarketVolume',
+            'marketCap'
+          ]
+        });
+
+        if (!quote) {
+          throw new Error(`No data received for ${symbol}`);
+        }
+
+        return {
+          symbol: quote.symbol || symbol,
+          name: quote.longName || quote.shortName || symbol,
+          price: Number(quote.regularMarketPrice) || 0,
+          change: Number(quote.regularMarketChange) || 0,
+          changePercentage: Number(quote.regularMarketChangePercent) || 0,
+          volume: Number(quote.regularMarketVolume) || 0,
+          marketCap: Number(quote.marketCap) || 0,
+        };
+      } catch (error) {
+        lastError = error as Error;
+        retries--;
+        
+        if (retries > 0) {
+          // Wait before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      }
     }
-    
+
+    // If all retries failed, return a fallback quote
+    console.warn(`Failed to fetch quote for ${symbol} after retries, using fallback data`);
     return {
-      symbol: quote.symbol || symbol,
-      name: quote.longName || quote.shortName || symbol,
-      price: Number(quote.regularMarketPrice) || 0,
-      change: Number(quote.regularMarketChange) || 0,
-      changePercentage: Number(quote.regularMarketChangePercent) || 0,
-      volume: Number(quote.regularMarketVolume) || 0,
-      marketCap: Number(quote.marketCap) || 0,
+      symbol: symbol,
+      name: symbol,
+      price: 0,
+      change: 0,
+      changePercentage: 0,
+      volume: 0,
+      marketCap: 0,
     };
   } catch (error) {
     console.error(`Error fetching quote for ${symbol}:`, error);
-    throw error;
+    // Return fallback data instead of throwing
+    return {
+      symbol: symbol,
+      name: symbol,
+      price: 0,
+      change: 0,
+      changePercentage: 0,
+      volume: 0,
+      marketCap: 0,
+    };
   }
 }
 

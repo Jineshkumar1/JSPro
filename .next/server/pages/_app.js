@@ -1,1 +1,5 @@
-(()=>{var e={};e.id=636,e.ids=[636],e.modules={7964:(e,r,s)=>{"use strict";s.r(r),s.d(r,{default:()=>i});var t=s(8732);s(82015),s(27852);let i=function({Component:e,pageProps:r}){return(0,t.jsx)("div",{className:"min-h-screen bg-background",children:(0,t.jsx)(e,{...r})})}},27852:()=>{},82015:e=>{"use strict";e.exports=require("react")},8732:e=>{"use strict";e.exports=require("react/jsx-runtime")}};var r=require("../webpack-runtime.js");r.C(e);var s=r(r.s=7964);module.exports=s})();
+const CHUNK_PUBLIC_PATH = "server/pages/_app.js";
+const runtime = require("../chunks/ssr/[turbopack]_runtime.js");
+runtime.loadChunk("server/chunks/ssr/[root of the server]__953d6a._.js");
+runtime.loadChunk("server/chunks/ssr/src_app_globals_10507a.css");
+module.exports = runtime.getOrInstantiateRuntimeModule("[project]/src/pages/_app.tsx [ssr] (ecmascript)", CHUNK_PUBLIC_PATH).exports;
