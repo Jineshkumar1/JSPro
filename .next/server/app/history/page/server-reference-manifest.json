@@ -1,16 +1,5 @@
 {
   "node": {
-    "40bd33f79784a5b327dd4f7e9d9d91296f4441366d": {
-      "workers": {
-        "app/history/page": {
-          "moduleId": "[project]/.next-internal/server/app/history/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
-          "async": false
-        }
-      },
-      "layer": {
-        "app/history/page": "action-browser"
-      }
-    },
     "00a7524b9b8affac61fd4d0445eb167ac604de6a5f": {
       "workers": {
         "app/history/page": {
@@ -33,7 +22,18 @@
         "app/history/page": "action-browser"
       }
     },
-    "600b19a42385ef78981a2bd8a66b15e716df2fe1af": {
+    "405563dba3228c3995b8263b12ef1b294126182fcf": {
+      "workers": {
+        "app/history/page": {
+          "moduleId": "[project]/.next-internal/server/app/history/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
+          "async": false
+        }
+      },
+      "layer": {
+        "app/history/page": "action-browser"
+      }
+    },
+    "40bd33f79784a5b327dd4f7e9d9d91296f4441366d": {
       "workers": {
         "app/history/page": {
           "moduleId": "[project]/.next-internal/server/app/history/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
@@ -55,7 +55,7 @@
         "app/history/page": "action-browser"
       }
     },
-    "405563dba3228c3995b8263b12ef1b294126182fcf": {
+    "600b19a42385ef78981a2bd8a66b15e716df2fe1af": {
       "workers": {
         "app/history/page": {
           "moduleId": "[project]/.next-internal/server/app/history/page/actions.js { ACTIONS_MODULE0 => \"[project]/src/app/actions/stockActions.ts [app-rsc] (ecmascript)\" } [app-rsc] (ecmascript)",
