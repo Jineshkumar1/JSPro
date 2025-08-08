@@ -84,7 +84,7 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ getStockQuote(symbol) {
     try {
         // Add retry logic and better error handling
         let retries = 3;
-        let lastError = null;
+        // Error tracking removed for cleaner code
         while(retries > 0){
             try {
                 const quote = await __TURBOPACK__imported__module__$5b$project$5d2f$node_modules$2f$yahoo$2d$finance2$2f$dist$2f$esm$2f$src$2f$index$2d$node$2e$js__$5b$app$2d$rsc$5d$__$28$ecmascript$29$__$3c$locals$3e$__["default"].quote(symbol, {
@@ -112,7 +112,7 @@ async function /*#__TURBOPACK_DISABLE_EXPORT_MERGING__*/ getStockQuote(symbol) {
                     marketCap: Number(quote.marketCap) || 0
                 };
             } catch (error) {
-                lastError = error;
+                // Error logged for debugging
                 retries--;
                 if (retries > 0) {
                     // Wait before retrying

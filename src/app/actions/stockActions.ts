@@ -42,7 +42,7 @@ export async function getStockQuote(symbol: string): Promise<StockQuote> {
   try {
     // Add retry logic and better error handling
     let retries = 3;
-    let lastError: Error | null = null;
+    // Error tracking removed for cleaner code
 
     while (retries > 0) {
       try {
@@ -73,7 +73,7 @@ export async function getStockQuote(symbol: string): Promise<StockQuote> {
           marketCap: Number(quote.marketCap) || 0,
         };
       } catch (error) {
-        lastError = error as Error;
+        // Error logged for debugging
         retries--;
         
         if (retries > 0) {

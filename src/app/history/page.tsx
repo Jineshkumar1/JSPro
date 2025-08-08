@@ -16,7 +16,7 @@ interface Transaction {
   description: string;
 }
 
-interface HistoryPageProps {}
+// Removed unused interface
 
 export default function HistoryPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
@@ -31,7 +31,7 @@ export default function HistoryPage() {
     try {
       const savedTransactions = localStorage.getItem('portfolioHistory');
       if (savedTransactions) {
-        const parsedTransactions = JSON.parse(savedTransactions).map((t: any) => ({
+        const parsedTransactions = JSON.parse(savedTransactions).map((t: Transaction) => ({
           ...t,
           timestamp: new Date(t.timestamp)
         }));
