@@ -26,9 +26,15 @@ export function Sidebar() {
     setIsAuthModalOpen(true);
   };
 
-  const handleSignOut = async () => {
-    await signOut();
-  };
+          const handleSignOut = async () => {
+            await signOut()
+            // Clear any local UI-only caches
+            try {
+              localStorage.removeItem('portfolioHoldings')
+              localStorage.removeItem('portfolioCash')
+              localStorage.removeItem('portfolioHistory')
+            } catch {}
+          };
 
   return (
     <div className="fixed left-0 top-0 z-40 h-screen w-sidebar border-r border-card bg-background">

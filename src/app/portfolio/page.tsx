@@ -9,6 +9,8 @@ import { EditStockModal } from "@/components/features/portfolio/EditStockModal";
 import { SellStockModal } from "@/components/features/portfolio/SellStockModal";
 import { CashModal } from "@/components/features/portfolio/CashModal";
 import { getStockQuote } from "@/app/actions/stockActions";
+import { useAuth } from "@/contexts/AuthContext";
+import { fetchPortfolioSnapshot, setCashBalance as setCashBalanceDb, upsertHolding, deleteHolding, updateHoldingShares, addTransaction as addTxn } from "@/services/portfolio";
 
 interface PortfolioHolding {
   symbol: string;
@@ -43,6 +45,7 @@ interface Transaction {
 }
 
 export default function PortfolioPage() {
+  const { user } = useAuth()
   const [holdings, setHoldings] = useState<PortfolioHolding[]>([]);
   const [cashBalance, setCashBalance] = useState<number>(0);
   const [metrics, setMetrics] = useState<PortfolioMetrics>({
@@ -79,61 +82,82 @@ export default function PortfolioPage() {
     });
   }, []);
 
-  // Save portfolio data to localStorage
-  const savePortfolioData = useCallback((holdingsData: PortfolioHolding[], cashData: number) => {
+  // Persist portfolio to Supabase for signed-in users
+  const savePortfolioData = useCallback(async (holdingsData: PortfolioHolding[], cashData: number) => {
     try {
-      localStorage.setItem('portfolioHoldings', JSON.stringify(holdingsData));
-      localStorage.setItem('portfolioCash', cashData.toString());
+      if (!user) return
+      const snapshot = await fetchPortfolioSnapshot(user.id)
+      await setCashBalanceDb(snapshot.portfolioId, cashData)
+      await Promise.all(
+        holdingsData.map(h =>
+          upsertHolding(snapshot.portfolioId, {
+            symbol: h.symbol,
+            name: h.name,
+            shares: h.shares,
+            avgPrice: h.avgPrice,
+            currentPrice: h.currentPrice,
+          })
+        )
+      )
     } catch (error) {
-      console.error('Error saving portfolio data:', error);
+      console.error('Error saving portfolio data:', error)
     }
-  }, []);
+  }, [user]);
 
-  // Add transaction to history
-  const addTransactionToHistory = useCallback((transaction: Omit<Transaction, 'id' | 'timestamp'>) => {
+  // Add transaction to history (Supabase)
+  const addTransactionToHistory = useCallback(async (t: Omit<Transaction, 'id' | 'timestamp'>) => {
     try {
-      const savedTransactions = localStorage.getItem('portfolioHistory');
-      const transactions: Transaction[] = savedTransactions ? JSON.parse(savedTransactions) : [];
-      
-      const newTransaction: Transaction = {
-        ...transaction,
-        id: Date.now().toString(),
-        timestamp: new Date()
-      };
-      
-      transactions.unshift(newTransaction);
-      localStorage.setItem('portfolioHistory', JSON.stringify(transactions));
+      if (!user) return
+      const snapshot = await fetchPortfolioSnapshot(user.id)
+      await addTxn(snapshot.portfolioId, {
+        type: t.type,
+        symbol: t.symbol,
+        name: t.name,
+        shares: t.shares,
+        price: t.price,
+        amount: t.amount,
+        description: t.description,
+      })
     } catch (error) {
-      console.error('Error saving transaction history:', error);
+      console.error('Error saving transaction history:', error)
     }
-  }, []);
+  }, [user]);
 
-  // Load portfolio data from localStorage
-  const loadPortfolioData = useCallback(() => {
+  // Load portfolio data from Supabase for signed-in users
+  const loadPortfolioData = useCallback(async () => {
     try {
-      const savedHoldings = localStorage.getItem('portfolioHoldings');
-      const savedCash = localStorage.getItem('portfolioCash');
-
-      let initialHoldings: PortfolioHolding[] = [];
-      let initialCash = 0;
-
-      if (savedHoldings) {
-        initialHoldings = JSON.parse(savedHoldings);
+      if (!user) {
+        setHoldings([])
+        setCashBalance(0)
+        setIsLoading(false)
+        return
       }
-
-      if (savedCash) {
-        initialCash = parseFloat(savedCash);
-      }
-
-      setHoldings(initialHoldings);
-      setCashBalance(initialCash);
-      calculateMetrics(initialHoldings, initialCash);
+      const snapshot = await fetchPortfolioSnapshot(user.id)
+      const mapped: PortfolioHolding[] = snapshot.holdings.map(h => {
+        const value = h.shares * (h.currentPrice ?? 0)
+        const cost = h.shares * h.avgPrice
+        const ret = value - cost
+        const retPct = cost > 0 ? (ret / cost) * 100 : 0
+        return {
+          symbol: h.symbol,
+          name: h.name,
+          shares: h.shares,
+          avgPrice: h.avgPrice,
+          currentPrice: h.currentPrice ?? 0,
+          value,
+          return: ret,
+          returnPercentage: retPct,
+        }
+      })
+      setHoldings(mapped)
+      setCashBalance(snapshot.cashBalance)
+      calculateMetrics(mapped, snapshot.cashBalance)
     } catch (error) {
-      console.error('Error loading portfolio data:', error);
+      console.error('Error loading portfolio data:', error)
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  }, [calculateMetrics]);
+  }, [user, calculateMetrics]);
 
   // Update current prices for all holdings
   const updateCurrentPrices = useCallback(async (currentHoldings: PortfolioHolding[]) => {
@@ -177,10 +201,10 @@ export default function PortfolioPage() {
     }
   }, [cashBalance, calculateMetrics, savePortfolioData]);
 
-  // Load data on component mount
+  // Load data when auth/user is ready or changes
   useEffect(() => {
     loadPortfolioData();
-  }, []); // Empty dependency array
+  }, [user, loadPortfolioData]);
 
   // Update prices when component mounts and we have holdings
   useEffect(() => {
@@ -323,7 +347,7 @@ export default function PortfolioPage() {
     setIsCashModalOpen(true);
   }, []);
 
-  const handleCashTransaction = useCallback((amount: number) => {
+  const handleCashTransaction = useCallback(async (amount: number) => {
     let newCashBalance = cashBalance;
 
     if (cashAction === 'deposit') {
@@ -337,7 +361,12 @@ export default function PortfolioPage() {
     }
 
     setCashBalance(newCashBalance);
-    localStorage.setItem('portfolioCash', newCashBalance.toString());
+    try {
+      if (user) {
+        const snapshot = await fetchPortfolioSnapshot(user.id)
+        await setCashBalanceDb(snapshot.portfolioId, newCashBalance)
+      }
+    } catch {}
     calculateMetrics(holdings, newCashBalance);
 
     // Add transaction to history
@@ -348,7 +377,7 @@ export default function PortfolioPage() {
     });
 
     setIsCashModalOpen(false);
-  }, [cashBalance, cashAction, holdings, calculateMetrics, addTransactionToHistory]);
+  }, [user, cashBalance, cashAction, holdings, calculateMetrics, addTransactionToHistory]);
 
   const handleQuickAction = useCallback((action: string) => {
     switch (action) {
